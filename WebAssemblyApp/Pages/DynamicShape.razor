@@ -57,6 +57,10 @@
         double centerX = 250;
         double centerY = 200;
         
+        // Starting position for the first line
+        double currentX = centerX;
+        double currentY = centerY;
+        
         for (int i = 0; i < inputText.Length; i++)
         {
             char c = inputText[i];
@@ -65,17 +69,11 @@
             // Use unicode value to determine line properties
             double angle = (unicode * 5.7) % 360; // Different multiplier for more variation
             double length = (unicode % 80) + 20; // Line length between 20-99
-            double offsetRadius = (unicode % 100) + 10; // Distance from center
             
-            // Calculate line position based on character index and unicode
-            double baseAngle = (i * 360.0 / inputText.Length) * Math.PI / 180;
-            double lineX = centerX + Math.Cos(baseAngle) * offsetRadius;
-            double lineY = centerY + Math.Sin(baseAngle) * offsetRadius;
-            
-            // Calculate line end position
+            // Calculate line end position from current position
             double lineAngle = angle * Math.PI / 180;
-            double endX = lineX + Math.Cos(lineAngle) * length;
-            double endY = lineY + Math.Sin(lineAngle) * length;
+            double endX = currentX + Math.Cos(lineAngle) * length;
+            double endY = currentY + Math.Sin(lineAngle) * length;
             
             // Generate color based on unicode value
             string color = GenerateColor(unicode);
@@ -83,13 +81,17 @@
             
             shapeLines.Add(new ShapeLine
             {
-                X1 = lineX,
-                Y1 = lineY,
+                X1 = currentX,
+                Y1 = currentY,
                 X2 = endX,
                 Y2 = endY,
                 Color = color,
                 Width = width
             });
+            
+            // Update current position to the end of this line for the next line to connect
+            currentX = endX;
+            currentY = endY;
         }
     }
 
