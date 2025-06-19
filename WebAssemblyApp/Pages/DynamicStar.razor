@@ -1,0 +1,62 @@
+﻿@page "/dynamic-star"
+
+<PageTitle>Dynamic Star</PageTitle>
+
+<h1>Dynamic Star</h1>
+
+<div style="margin-top: 2rem;">
+    <div class="mb-3">
+        <label for="starPoints" class="form-label">Number of star points:</label>
+        <input type="number" id="starPoints" class="form-control" style="width: 200px;" 
+               @bind="numberOfPoints" @oninput="OnPointsChanged" min="3" max="20" />
+    </div>
+    
+    <div class="star-container" style="margin-top: 2rem;">
+        <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="@starPoints" fill="#1b6ec2" stroke="#333" stroke-width="2"/>
+        </svg>
+    </div>
+</div>
+
+@code {
+    private string starPoints = "";
+    private int numberOfPoints = 5;
+
+    protected override void OnInitialized()
+    {
+        UpdateStar();
+    }
+
+    private void OnPointsChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int points) && points >= 3 && points <= 20)
+        {
+            numberOfPoints = points;
+            UpdateStar();
+        }
+    }
+
+    private void UpdateStar()
+    {
+        starPoints = GenerateStarPoints(100, 100, 80, 30, numberOfPoints);
+    }
+
+    private string GenerateStarPoints(double centerX, double centerY, double outerRadius, double innerRadius, int points)
+    {
+        var coordinates = new List<string>();
+        double angleStep = Math.PI / points;
+
+        for (int i = 0; i < points * 2; i++)
+        {
+            double angle = i * angleStep - Math.PI / 2;
+            double radius = (i % 2 == 0) ? outerRadius : innerRadius;
+            
+            double x = centerX + radius * Math.Cos(angle);
+            double y = centerY + radius * Math.Sin(angle);
+            
+            coordinates.Add($"{x:F1},{y:F1}");
+        }
+
+        return string.Join(" ", coordinates);
+    }
+}
