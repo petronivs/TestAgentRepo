@@ -61,19 +61,33 @@
         double currentX = centerX;
         double currentY = centerY;
         
+        // Starting angle (0 degrees)
+        double currentAngle = 0;
+        
         for (int i = 0; i < inputText.Length; i++)
         {
             char c = inputText[i];
             int unicode = (int)c;
             
-            // Use unicode value to determine line properties
-            double angle = (unicode * 5.7) % 360; // Different multiplier for more variation
+            // Each line adds 180 degrees to its angle
+            double angle = currentAngle + (i * 180);
             double length = (unicode % 80) + 20; // Line length between 20-99
             
             // Calculate line end position from current position
             double lineAngle = angle * Math.PI / 180;
-            double endX = currentX + Math.Cos(lineAngle) * length;
-            double endY = currentY + Math.Sin(lineAngle) * length;
+            double proposedEndX = currentX + Math.Cos(lineAngle) * length;
+            double proposedEndY = currentY + Math.Sin(lineAngle) * length;
+            
+            // Ensure the line fits within the SVG bounds (500x400)
+            double endX = proposedEndX;
+            double endY = proposedEndY;
+            
+            // Clamp the end position to stay within bounds with some margin
+            double margin = 10;
+            if (endX < margin) endX = margin;
+            if (endX > 500 - margin) endX = 500 - margin;
+            if (endY < margin) endY = margin;
+            if (endY > 400 - margin) endY = 400 - margin;
             
             // Generate color based on unicode value
             string color = GenerateColor(unicode);
