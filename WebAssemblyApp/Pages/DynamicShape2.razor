@@ -1,4 +1,5 @@
 ﻿@page "/dynamic-shape-2"
+@using DynamicShapeLogic
 
 <PageTitle>Dynamic Shape 2</PageTitle>
 
@@ -35,6 +36,7 @@
 @code {
     private string inputText = "";
     private List<ShapeLine> shapeLines = new List<ShapeLine>();
+    private readonly DynamicShapeGenerator shapeGenerator = new DynamicShapeGenerator();
 
     protected override void OnInitialized()
     {
@@ -49,93 +51,6 @@
 
     private void UpdateShape()
     {
-        shapeLines.Clear();
-        
-        if (string.IsNullOrEmpty(inputText))
-            return;
-
-        double centerX = 250;
-        double centerY = 200;
-        
-        // Starting position for the first line
-        double currentX = centerX;
-        double currentY = centerY;
-        
-        for (int i = 0; i < inputText.Length; i++)
-        {
-            char c = inputText[i];
-            int unicode = (int)c;
-            
-            // Use unicode value directly as angle (in degrees)
-            double angle = unicode;
-            double length = (unicode % 80) + 20; // Line length between 20-99
-            
-            // Calculate line end position from current position
-            double lineAngle = angle * Math.PI / 180;
-            double proposedEndX = currentX + Math.Cos(lineAngle) * length;
-            double proposedEndY = currentY + Math.Sin(lineAngle) * length;
-            
-            // Check if line points away from both center lines
-            bool pointsAwayFromVerticalCenter = Math.Abs(proposedEndX - centerX) > Math.Abs(currentX - centerX);
-            bool pointsAwayFromHorizontalCenter = Math.Abs(proposedEndY - centerY) > Math.Abs(currentY - centerY);
-            
-            // Flip the line if it points away from both center lines
-            if (pointsAwayFromVerticalCenter && pointsAwayFromHorizontalCenter)
-            {
-                angle += 180;
-                lineAngle = angle * Math.PI / 180;
-                proposedEndX = currentX + Math.Cos(lineAngle) * length;
-                proposedEndY = currentY + Math.Sin(lineAngle) * length;
-            }
-            
-            // Ensure the line fits within the SVG bounds (500x400)
-            double endX = proposedEndX;
-            double endY = proposedEndY;
-            
-            // Clamp the end position to stay within bounds with some margin
-            double margin = 10;
-            if (endX < margin) endX = margin;
-            if (endX > 500 - margin) endX = 500 - margin;
-            if (endY < margin) endY = margin;
-            if (endY > 400 - margin) endY = 400 - margin;
-            
-            // Generate color based on unicode value
-            string color = GenerateColor(unicode);
-            int width = (unicode % 3) + 1; // Line width between 1-3
-            
-            shapeLines.Add(new ShapeLine
-            {
-                X1 = currentX,
-                Y1 = currentY,
-                X2 = endX,
-                Y2 = endY,
-                Color = color,
-                Width = width
-            });
-            
-            // Update current position to the end of this line for the next line to connect
-            currentX = endX;
-            currentY = endY;
-        }
-    }
-
-    private string GenerateColor(int unicode)
-    {
-        // Generate color based on unicode value
-        int r = (unicode * 7) % 256;
-        int g = (unicode * 13) % 256;
-        int b = (unicode * 19) % 256;
-        
-        return $"rgb({r},{g},{b})";
-    }
-
-    private class ShapeLine
-    {
-        public double X1 { get; set; }
-        public double Y1 { get; set; }
-        public double X2 { get; set; }
-        public double Y2 { get; set; }
-        public string Color { get; set; } = "";
-        public int Width { get; set; }
+        shapeLines = shapeGenerator.GenerateShape(inputText);
     }
 }
